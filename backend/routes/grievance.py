@@ -5,6 +5,8 @@ from database import get_db
 from model import Grievance, User
 from schemas import (GrievanceCreate, GrievanceResponse, StatusUpdate)
 from services.grievance_service import classify_grievance
+from ai.grievance_ai import classify_with_ai
+from services.language_service import detect_language
 
 router = APIRouter(
     prefix="/grievances",
@@ -21,20 +23,43 @@ def create_grievance(
     grievance: GrievanceCreate,
     db: Session = Depends(get_db)
 ):
-    classification = classify_grievance(
-        grievance.original_text
-    )
+
+    if grievance.language == "auto":
+        detected_language = detect_language(grievance.original_text)
+    else:
+        detected_language = grievance.language
+    try:
+        ai_result = classify_with_ai(
+            grievance.original_text,
+            detected_language
+        )
+        category=ai_result.category
+        department=ai_result.department
+        priority=ai_result.priority
+        summary=ai_result.summary
+        
+    except Exception as e:
+        print("AI Classification Failed:", e)
+        from services.grievance_service import classify_grievance
+        fallback = classify_grievance(
+            grievance.original_text
+        )
+        category = fallback["category"]
+        department = fallback["department"]
+        priority = fallback["priority"]
+        summary = fallback["summary"]
+
     grievance_id = generate_grievance_id(db)
     new_grievance = Grievance(
         grievance_id=grievance_id,
         user_id=grievance.user_id,
-        language=grievance.language,
+        language=detected_language,
         original_text=grievance.original_text,
         location=grievance.location,
-        category=classification["category"],
-        department=classification["department"],
-        priority=classification["priority"],
-        summary=classification["summary"],
+        category=category,
+        department=department,
+        priority=priority,
+        summary=summary,
         status="submitted"
     )
     db.add(new_grievance)

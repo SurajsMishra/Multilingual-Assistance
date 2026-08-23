@@ -6,7 +6,7 @@ from pydantic import BaseModel, Field
 class UserBase(BaseModel):
     name: str = Field(..., min_length=2, max_length=100)
     phone: Optional[str] = Field(None, max_length=20)
-    language: str = Field("en", max_length=10)
+    language: str = Field("auto", max_length=10)
 
 class UserCreate(UserBase):
     pass
@@ -25,7 +25,7 @@ class GrievanceCreate(BaseModel):
         max_length=5000,
         description="Raw input grievance text from the user"
     )
-    language: str = Field("en", max_length=10)
+    language: str = Field("auto", max_length=10)
     location: Optional[str] = Field(None, max_length=255)
     user_id: Optional[int] = None
 
