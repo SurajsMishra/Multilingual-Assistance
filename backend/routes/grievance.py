@@ -139,14 +139,17 @@ async def create_voice_grievance(
 ):
     import os
     import uuid
-    file_extension = os.path.splitext(audio.filename)[1]
+    file_extension = os.path.splitext(audio.filename)[1].lower()
     if not file_extension:
-        file_extension = ".wav"
+        file_extension = ".webm"
 
     audio_path = f"temp_{uuid.uuid4()}{file_extension}"
     try:
         with open(audio_path, "wb") as f:
             f.write(await audio.read())
+        print("Audio file:", audio_path)
+        print("Audio extension:", file_extension)
+        print("Audio size:", os.path.getsize(audio_path), "bytes")
         speech_result = speech_to_text(audio_path)
         text = speech_result["text"]
         detected_language = speech_result["language"]
@@ -160,13 +163,13 @@ async def create_voice_grievance(
     
         try:
             ai_result = classify_with_ai(
-                grievance.original_text,
+                text,
                 detected_language
-        )
-            category=ai_result.category
-            department=ai_result.department
-            priority=ai_result.priority
-            summary=ai_result.summary
+            )
+            category = ai_result.category
+            department = ai_result.department
+            priority = ai_result.priority
+            summary = ai_result.summary
         except Exception as e:
             print("AI Classification failed", e)
             fallback = classify_grievance(text)
@@ -174,70 +177,72 @@ async def create_voice_grievance(
             department = fallback["department"]
             priority = fallback["priority"]
             summary = fallback["summary"]
-            intent = "grievance"
-            grievance_id = generate_grievance_id(db)
-            if detected_language == "hi":
-                response_text = (
-                    f"आपकी शिकायत सफलतापूर्वक दर्ज कर ली गई है। "
-                    f"आपकी शिकायत संख्या {grievance_id} है।"
-                )
-            else:
-                response_text = (
-                    f"Your grievance has been successfully registered. "
-                    f"Your grievance number is {grievance_id}."
-                )
-        
-            new_grievance = Grievance(
-                grievance_id=grievance_id,
-                original_text = text,
-                language=detected_language,
-                category=category,
-                department=department,
-                priority=priority,
-                summary=summary,
-                status="submitted"
+
+        intent = "grievance"
+        grievance_id = generate_grievance_id(db)
+        if detected_language == "hi":
+            response_text = (
+                f"आपकी शिकायत सफलतापूर्वक दर्ज कर ली गई है। "
+                f"आपकी शिकायत संख्या {grievance_id} है।"
             )
-            db.add(new_grievance)
-            db.commit()
-            db.refresh(new_grievance)
-            audio_dir = "audio"
-            os.makedirs(
-                audio_dir,
-                exist_ok =True
+        else:
+            response_text = (
+                f"Your grievance has been successfully registered. "
+                f"Your grievance number is {grievance_id}."
             )
-            audio_filename = f"{grievance_id}.mp3"
-            audio_output_path = os.path.join(
-                audio_dir,
-                audio_filename
-            )
-            print("Generating TTS....")
-            print("Audio path:", audio_output_path)
-            await text_to_speech(
-                response_text,
-                detected_language,
-                audio_output_path
-            )
-            print("Audio generated:", os.path.exists(audio_output_path))
-            return {
-                "success": True,
-                "grievance_id": grievance_id,
-                "text": text,
-                "language": detected_language,
-                "category": category,
-                "department": department,
-                "priority": priority,
-                "summary": summary,
-                "intent": intent,
-                "status": "submitted",
-                "response_text": response_text,
-                "audio_url": f"/grievances/audio/{audio_filename}"
-            }
+
+        new_grievance = Grievance(
+            grievance_id=grievance_id,
+            original_text=text,
+            language=detected_language,
+            category=category,
+            department=department,
+            priority=priority,
+            summary=summary,
+            status="submitted"
+        )
+        db.add(new_grievance)
+        db.commit()
+        db.refresh(new_grievance)
+        audio_dir = "audio"
+        os.makedirs(
+            audio_dir,
+            exist_ok=True
+        )
+        audio_filename = f"{grievance_id}.mp3"
+        audio_output_path = os.path.join(
+            audio_dir,
+            audio_filename
+        )
+        print("Generating TTS....")
+        print("Audio path:", audio_output_path)
+        await text_to_speech(
+            response_text,
+            detected_language,
+            audio_output_path
+        )
+        print("Audio generated:", os.path.exists(audio_output_path))
+        return {
+            "success": True,
+            "grievance_id": grievance_id,
+            "text": text,
+            "language": detected_language,
+            "category": category,
+            "department": department,
+            "priority": priority,
+            "summary": summary,
+            "intent": intent,
+            "status": "submitted",
+            "response_text": response_text,
+            "audio_url": f"/grievances/audio/{audio_filename}"
+        }
     finally:
         if os.path.exists(audio_path):
             os.remove(audio_path)
-   
+            print("Cleaned up temp audio file:", audio_path)
+
 @router.get("/audio/{filename}")
-async def get_audio(filename:str):
+async def get_audio(filename: str):
     import os
     BASE_DIR = os.path.dirname(
         os.path.dirname(
@@ -259,7 +264,7 @@ async def get_audio(filename:str):
     if not os.path.exists(file_path):
         raise HTTPException(
             status_code=404,
-            detail = "Audio file not found:{filename}"
+            detail=f"Audio file not found: {filename}"
         )
 
     return FileResponse(

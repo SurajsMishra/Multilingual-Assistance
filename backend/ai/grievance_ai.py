@@ -1,5 +1,6 @@
+import json
 from pydantic import BaseModel
-from ollama import chat
+from ai.groq import generate_response
 class GrievanceResult(BaseModel):
     category : str
     department: str
@@ -8,17 +9,19 @@ class GrievanceResult(BaseModel):
     intent: str
 
 def classify_with_ai(text: str, language: str):
+
     prompt = f"""
-    You are an AI classifier for a government citizen grievance system.
+You are an AI classifier for a government citizen grievance system.
 
 Analyze the citizen complaint.
+
 Citizen language:
 {language}
 
 Complaint:
 {text}
 
-Choose exactly one category:
+Choose exactly ONE category from:
 water_supply
 road
 electricity
@@ -31,7 +34,7 @@ transport
 municipal
 general
 
-Choose exactly one depatment:
+Choose exactly ONE department from:
 water_department
 pwd
 electricity_department
@@ -43,47 +46,39 @@ education_department
 transport_department
 general_department
 
-Choose exactly one priority:
+Choose exactly ONE priority from:
 low
 medium
 high
 critical
 
-Choose exactly one intent:
-
+Choose exactly ONE intent from:
 grievance
 scheme_query
 general_query
 
 Rules:
-
 - Understand Hindi, English and Hinglish.
 - Preserve the meaning of the citizen's complaint.
 - Do not invent facts.
 - Use critical only for serious emergencies or threats to life.
 - Keep the summary short.
+- Return ONLY valid JSON.
 """
 
-    response = chat(
-        model = "llama3.2:3b",
-        messages = [
-            {
-                "role": "system",
-                "content":(
-                    "You classify citizen complaint info"
-                    "structured govermnment-service categories."
-                )
-            },
-            {
-                "role":"user",
-                "content":prompt
-            }
-        ],
-        format=GrievanceResult.model_json_schema(),
-        options={
-            "temperature": 0
-        }
+    response = generate_response(
+        prompt,
+        temperature=0,
+        max_tokens=300
     )
 
-    result = GrievanceResult.model_validate_json(response.message.content)
+    data = json.loads(response)
+
+    # Safety fallback if the model forgets the summary
+    if not data.get("summary"):
+        data["summary"] = text
+
+    # Validate against our Pydantic model
+    result = GrievanceResult.model_validate(data)
+
     return result

@@ -1,12 +1,25 @@
+# Environment
+.env
+
+# Python
 venv/
+.venv/
 __pycache__/
 *.pyc
-.env
+
+# Local databases
 *.db
-node_modules/
-dist/
+*.sqlite
+*.sqlite3
+
+# Generated audio
 audio/
 *.mp3
 *.wav
+*.webm
 
+# Temporary files
+temp_*
 
+# RAG generated database
+chroma_db/

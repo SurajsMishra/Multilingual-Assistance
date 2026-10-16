@@ -3,6 +3,11 @@ from fastapi.middleware.cors import CORSMiddleware
 from database import Base, engine
 import model
 from routes.grievance import router as grievance_router
+from schemes.router import router as scheme_router
+
+
+
+
 
 Base.metadata.create_all(bind=engine)
 app = FastAPI(
@@ -21,7 +26,7 @@ app.add_middleware(
 )
 
 app.include_router(grievance_router)
-
+app.include_router(scheme_router)
 @app.get("/")
 def read_root():
     return {
