@@ -1,0 +1,45 @@
+[
+    {
+        "name": "Post Matric Scholarship",
+        "category": "Education",
+        "state": "Uttar Pradesh",
+        "description": "Scholarship support for eligible students pursuing education after matriculation.",
+        "eligibility": "Eligibility depends on category, family income and educational status.",
+        "benefits": "Financial assistance for eligible educational expenses.",
+        "documents": [
+            "Aadhaar Card",
+            "Income Certificate",
+            "Caste Certificate",
+            "Previous Marksheet",
+            "Bank Account"
+        ],
+        "application": "Apply through the relevant official scholarship portal."
+    },
+    {
+        "name": "PM-KISAN",
+        "category": "Agriculture",
+        "state": "Central",
+        "description": "Income support scheme for eligible farmer families.",
+        "eligibility": "Eligible farmer families according to scheme rules.",
+        "benefits": "Financial support provided according to the scheme guidelines.",
+        "documents": [
+            "Aadhaar Card",
+            "Land Records",
+            "Bank Account"
+        ],
+        "application": "Application and verification are carried out through the designated government process."
+    },
+    {
+        "name": "Ayushman Bharat",
+        "category": "Healthcare",
+        "state": "Central",
+        "description": "Government health protection scheme for eligible beneficiaries.",
+        "eligibility": "Eligibility is determined according to the applicable government database and scheme rules.",
+        "benefits": "Healthcare coverage for eligible beneficiaries.",
+        "documents": [
+            "Aadhaar Card",
+            "Beneficiary Identification Documents"
+        ],
+        "application": "Check eligibility through an official government channel."
+    }
+]

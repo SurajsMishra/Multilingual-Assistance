@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Multilingual Assistante</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+    <div class="Container">
+        <header>
+            <h1>Multilingual Grievance Assistant</h1>
+            <p>
+                Speak in your preferred language and register your Grievance
+            </p>
+        </header>
+        <main>
+            <div class="Voice-section">
+                <button id="recordBtn">🎤 Start Recording</button>
+                <p id="recordStatus">Click the button to start speaking</p>
+            </div>
+            <div class="result-card">
+                <h2>Grievance Details</h2>
+                <div class="result">
+                    <strong>Transcription:</strong>
+                    <p id="transcription"></p>
+                </div>
+                <div class="result">
+                    <strong>Language:</strong>
+                    <span id="language"></span>
+                </div>
+                <div class="result">
+                    <strong>Category:</strong>
+                    <span id="category"></span>
+                </div>
+                <div class="result">
+                    <strong>Department:</strong>
+                    <span id="department"></span>
+                </div>
+                <div class="result">
+                    <strong>Priority:</strong>
+                    <span id="priority"></span>
+                </div>
+                <div class="result">
+                    <strong>Grievance ID:</strong>
+                    <span id="grievanceId"></span>
+                </div>
+            </div>
+            <div class="response-card">
+                <h2>Assistant Response</h2>
+                <p id="responseText"></p>
+                <audio id="responseAudio" controls></audio>
+            </div>
+        </main>
+    </div>
+    <script src="script.js"></script>
+</body>
+
+</html>
